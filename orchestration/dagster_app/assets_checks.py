@@ -1,5 +1,5 @@
 from dagster import asset, Config
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 import pandas as pd
 import json
 from analysis.srm_checks import check_srm

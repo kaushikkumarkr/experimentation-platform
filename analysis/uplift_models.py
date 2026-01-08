@@ -1,9 +1,9 @@
 import pandas as pd
-import numpy as np
+
 from sklearn.model_selection import train_test_split
 from sklift.models import SoloModel, ClassTransformation
 from sklift.metrics import qini_auc_score, uplift_at_k
-from catboost import CatBoostClassifier
+
 # Note: CatBoost is heavy, usually fine, but if we want lighter we can use RandomForest
 from sklearn.ensemble import RandomForestClassifier
 

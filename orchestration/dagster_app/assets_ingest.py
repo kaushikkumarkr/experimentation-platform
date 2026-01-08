@@ -1,6 +1,6 @@
 from dagster import asset, Config
 import subprocess
-import os
+
 import pandas as pd
 from sqlalchemy import create_engine
 

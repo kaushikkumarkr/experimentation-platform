@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import pytest
+
 from analysis.ab_tests import calculate_ab_stats
 
 def test_binary_stats():
