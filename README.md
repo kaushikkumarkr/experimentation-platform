@@ -15,11 +15,11 @@ A production-grade platform for running A/B tests, CUPED variance reduction, and
 graph TD
     subgraph Ingestion
         A[HuggingFace/Synthetic] -->|download_data.py| B(CSV File)
-        B -->|load_to_postgres.py| C[(Postgres: raw.criteo_uplift)]
+        B -->|load_to_postgres.py| C[("Postgres: raw.criteo_uplift")]
     end
 
     subgraph Data Marts
-        C -->|dbt/Pandas| D[(Postgres: experiment_observations)]
+        C -->|dbt/Pandas| D[("Postgres: experiment_observations")]
         D -->|JSONB Features| E[Feature Extraction]
     end
 
@@ -28,11 +28,11 @@ graph TD
         F -->|Pass/Fail| G{Health Check}
         G -->|Pass| H[Frequentist A/B]
         G -->|Pass| I[CUPED Variance Reduction]
-        G -->|Pass| J[Uplift Modeling (S-Learner)]
+        G -->|Pass| J["Uplift Modeling (S-Learner)"]
     end
 
     subgraph Reporting
-        H --> K[(Postgres: Results)]
+        H --> K[("Postgres: Results")]
         I --> K
         J --> K
         K --> L[Decision Engine]
