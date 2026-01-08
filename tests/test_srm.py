@@ -1,5 +1,5 @@
 import pandas as pd
-import pytest
+
 from analysis.srm_checks import check_srm
 
 def test_srm_perfect_split():

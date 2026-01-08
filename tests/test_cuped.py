@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import pytest
+
 from analysis.cuped import calculate_cuped_stats
 
 def test_cuped_variance_reduction():

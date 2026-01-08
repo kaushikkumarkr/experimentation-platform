@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import pytest
+
 from analysis.uplift_models import train_uplift_model
 
 def test_uplift_persuadables():
