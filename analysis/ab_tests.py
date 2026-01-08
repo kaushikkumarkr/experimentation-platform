@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from statsmodels.stats.proportion import proportions_ztest, proportion_confint
-from statsmodels.stats.weightstats import ttest_ind, CompareMeans, DescrStatsW
+from statsmodels.stats.proportion import proportions_ztest
+from statsmodels.stats.weightstats import CompareMeans, DescrStatsW
 
 def calculate_ab_stats(df: pd.DataFrame, metric_col: str, treatment_col='treatment', metric_type='continuous', alpha=0.05):
     """

@@ -1,5 +1,5 @@
 import pandas as pd
-import numpy as np
+
 import statsmodels.api as sm
 from analysis.ab_tests import calculate_ab_stats
 
