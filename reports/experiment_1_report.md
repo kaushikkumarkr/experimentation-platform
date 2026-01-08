@@ -20,3 +20,5 @@
 |---|---|---|---|---|
 | outcome_conversion | z_test | 0.0068 | 0.0000 | [0.0050, 0.0086] |
 | outcome_visit | welch_t_test | 0.0766 | 0.0000 | [0.0700, 0.0832] |
+| outcome_conversion | z_test | 0.0068 | 0.0000 | [0.0050, 0.0086] |
+| outcome_visit | welch_t_test | 0.0766 | 0.0000 | [0.0700, 0.0832] |

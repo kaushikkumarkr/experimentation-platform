@@ -1,0 +1,9 @@
+[32m2026-01-07 21:28:30 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - cb88025b-5d02-41de-8039-4702db71b0dd - 55142 - LOGS_CAPTURED - Started capturing logs in process (pid: 55142).
+[32m2026-01-07 21:28:30 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - cb88025b-5d02-41de-8039-4702db71b0dd - 55142 - hillstrom_data_file - STEP_START - Started execution of step "hillstrom_data_file".
+INFO:__main__:Attempting to download Hillstrom dataset...
+INFO:__main__:Downloaded 64000 rows from official source.
+[32m2026-01-07 21:28:42 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - cb88025b-5d02-41de-8039-4702db71b0dd - 55142 - hillstrom_data_file - STEP_OUTPUT - Yielded output "result" of type "Any". (Type check passed).
+[32m2026-01-07 21:28:42 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - cb88025b-5d02-41de-8039-4702db71b0dd - hillstrom_data_file - Writing file at: /Users/krkaushikkumar/Desktop/2/experimentation-platform/.tmp_dagster_home_uqxfk3lz/storage/hillstrom_data_file using PickledObjectFilesystemIOManager...
+[32m2026-01-07 21:28:43 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - cb88025b-5d02-41de-8039-4702db71b0dd - 55142 - hillstrom_data_file - ASSET_MATERIALIZATION - Materialized value hillstrom_data_file.
+[32m2026-01-07 21:28:43 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - cb88025b-5d02-41de-8039-4702db71b0dd - 55142 - hillstrom_data_file - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
+[32m2026-01-07 21:28:43 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - cb88025b-5d02-41de-8039-4702db71b0dd - 55142 - hillstrom_data_file - STEP_SUCCESS - Finished execution of step "hillstrom_data_file" in 12.33s.
