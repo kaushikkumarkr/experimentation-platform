@@ -7,90 +7,86 @@ class MartsConfig(Config):
     db_url: str = "postgresql://postgres:postgres@localhost:5432/experimentation_db"
 
 @asset
-def experiment_registry_seed(config: MartsConfig) -> str:
+def experiment_registry_seed(config: MartsConfig):
     """
-    Seeds the registry with our Criteo Test Experiment.
+    Seeds the registry with the Hillstrom experiment if not exists.
     """
     engine = create_engine(config.db_url)
     
-    # Check if exists
     with engine.connect() as conn:
-        res = conn.execute(text("SELECT count(*) FROM experimentation.experiment_registry WHERE name = 'Criteo Uplift Test'"))
-        count = res.scalar()
+        # Check if exists
+        res = conn.execute(text("SELECT experiment_id FROM experimentation.experiment_registry WHERE name = 'Hillstrom Mens Email'"))
+        if res.fetchone():
+            return "Experiment already exists."
         
-        if count == 0:
-            conn.execute(text("""
-                INSERT INTO experimentation.experiment_registry 
-                (name, owner, hypothesis, start_date, status, primary_metric)
-                VALUES 
-                ('Criteo Uplift Test', 'Data Science Team', 'Targeting high-uplift users will increase conversion.', '2023-01-01', 'analyzed', 'conversion')
-            """))
-            conn.commit()
-            return "Seeded Registry"
-        
-    return "Registry Already Seeded"
+        # Insert
+        conn.execute(text("""
+            INSERT INTO experimentation.experiment_registry 
+            (name, description, start_date, status, primary_metric, hypothesis)
+            VALUES 
+            ('Hillstrom Mens Email', 'Testing effect of Mens Merchandise Email vs No Email on spend.', '2023-01-01', 'analyzed', 'outcome_conversion', 'Mens Email increases spend for men.')
+        """))
+        conn.commit()
+    
+    return "Seeded Hillstrom experiment."
 
-@asset(deps=[experiment_registry_seed]) # Depend on registry existing
-def experiment_observations_mart(context, config: MartsConfig, raw_criteo_uplift: str) -> str:
+@asset
+def experiment_observations_mart(config: MartsConfig, raw_hillstrom, experiment_registry_seed):
     """
-    Transforms raw Criteo data into the Experiment Observations format.
-    Assumes all raw data belongs to Experiment ID 1 (The Seeded Experiment).
+    Transforms raw Hillstrom data into the experiment_observations mart.
+    Maps:
+      - Treatment: 'Mens E-Mail' -> 1, 'No E-Mail' -> 0. (Excludes 'Womens E-Mail')
+      - Outcome: conversion (spend > 0)
+      - Features: recency, history, zip_code, newbie, channel
     """
     engine = create_engine(config.db_url)
     
-    # get experiment id
-    with engine.connect() as conn:
-        res = conn.execute(text("SELECT experiment_id FROM experimentation.experiment_registry WHERE name = 'Criteo Uplift Test'"))
-        exp_id = res.scalar()
+    # 1. Fetch Experiment ID
+    exp_id = pd.read_sql("SELECT experiment_id FROM experimentation.experiment_registry WHERE name = 'Hillstrom Mens Email'", engine).iloc[0]['experiment_id']
+    
+    # 2. Fetch Raw Data
+    # Filter only Mens and Control
+    df = pd.read_sql("SELECT * FROM raw.hillstrom WHERE segment IN ('Mens E-Mail', 'No E-Mail')", engine)
+    
+    if df.empty:
+        return "No data found."
         
-    if not exp_id:
-        raise Exception("Experiment ID not found!")
+    # 3. Transform
+    # Treatment
+    df['treatment'] = df['segment'].apply(lambda x: 1 if x == 'Mens E-Mail' else 0)
     
-    # Read Raw Data
-    # In prod this would be incremental. Here we replace.
-    df = pd.read_sql(f"SELECT * FROM raw.{raw_criteo_uplift}", engine)
-    
-    context.log.info(f"Transforming {len(df)} rows...")
-    
-    # Map to schema
-    # raw: f0..f11, treatment, conversion, visit, exposure
-    # target: experiment_id, unit_id (synthesized), treatment, features (json), outcome_visit, outcome_conversion
-    
-    # Synth Unit ID
-    df['unit_id'] = df.index.astype(str) + "_user"
-    df['experiment_id'] = exp_id
+    # Outcomes
     df['outcome_conversion'] = df['conversion']
     df['outcome_visit'] = df['visit']
+    
+    # Features (Pack into JSON)
+    # Be sure to handle categorical variables if needed. 
+    # For simplicity, we keep them as is in JSON, but typical Uplift models (S-Learner trees) handle numbers best.
+    # We will One-Hot Encode categoricals for the Feature Vector
+    
+    # One-Hot Encoding for 'zip_code', 'channel'
+    dummy_cols = ['zip_code', 'channel']
+    df_dummies = pd.get_dummies(df[dummy_cols], prefix=dummy_cols, dtype=int)
+    
+    # Numeric features
+    numeric_cols = ['recency', 'history', 'mens', 'womens', 'newbie']
+    
+    # Combine
+    features_df = pd.concat([df[numeric_cols], df_dummies], axis=1)
+    
+    # Convert to list of dicts for JSONB
+    df['features'] = features_df.to_dict(orient='records')
+    df['features'] = df['features'].apply(json.dumps)
+    
+    # Unit ID (Synthetic)
+    df['unit_id'] = df.index.astype(str) + '_user'
+    df['experiment_id'] = int(exp_id)
     df['batch_date'] = '2023-01-01'
     
-    # Features to JSON
-    feature_cols = [c for c in df.columns if c.startswith('f')]
-    # This is slow for large dataframes, acceptable for 1M rows dev mode
-    # For speed, we stick to columns or pre-optimized JSON gen.
-    # df['features'] = df[feature_cols].apply(lambda x: x.to_json(), axis=1) 
-    # Use to_dict -> json dumps for speed vectorization usually better but let's trust pandas for now or just avoid complex JSON if not needed.
-    # Actually, Postgres JSONB from pandas dict is easy.
+    # Select Columns
+    mart_df = df[['experiment_id', 'unit_id', 'treatment', 'features', 'outcome_visit', 'outcome_conversion', 'batch_date']]
     
-    # Let's just create a features dict column
-    df['features'] = df[feature_cols].to_dict(orient='records')
+    # Load to Postgres
+    mart_df.to_sql('experiment_observations', engine, schema='experimentation', if_exists='replace', index=False)
     
-    # Select final columns
-    final_df = df[['experiment_id', 'unit_id', 'treatment', 'features', 'outcome_visit', 'outcome_conversion', 'batch_date']]
-    
-    # Write to Mart
-    # We use 'replace' to be idempotent for this demo, in real life 'append' with limits.
-    # Note: 'features' column (dict) needs to be handled by sqlalchemy dialect correctly as JSON. 
-    # Pandas `to_sql` usually handles dicts as text or requires specific dtype=JSON.
-    from sqlalchemy.types import JSON
-    
-    final_df.to_sql(
-        'experiment_observations', 
-        engine, 
-        schema='experimentation', 
-        if_exists='replace', 
-        index=False,
-        dtype={'features': JSON}
-    )
-    
-    context.log.info("Mart Populated.")
-    return "experimentation.experiment_observations"
+    return f"Transformed {len(mart_df)} rows into observations mart."

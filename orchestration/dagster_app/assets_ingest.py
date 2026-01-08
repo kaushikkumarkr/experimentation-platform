@@ -1,37 +1,49 @@
 from dagster import asset, Config
-import os
 import subprocess
+import os
+import pandas as pd
+from sqlalchemy import create_engine
 
 class IngestConfig(Config):
-    sample_size: int = 100000
     db_url: str = "postgresql://postgres:postgres@localhost:5432/experimentation_db"
+    input_file: str = "data/hillstrom.csv"
 
 @asset
-def criteo_data_file(config: IngestConfig) -> str:
+def hillstrom_data_file():
     """
-    Downloads/Generates Criteo data and returns the path.
+    Downloads the Hillstrom Email Marketing dataset.
     """
-    output_path = "data/criteo_sample.csv"
-    cmd = [
-        "python3", "scripts/download_data.py",
-        "--output-path", output_path,
-        "--sample-size", str(config.sample_size)
-    ]
-    subprocess.check_call(cmd)
-    return os.path.abspath(output_path)
+    output_path = "data/hillstrom.csv"
+    script_path = "scripts/download_data.py"
+    
+    # Run the script
+    subprocess.run(["python3", script_path, "--output-path", output_path], check=True)
+    
+    return output_path
 
 @asset
-def raw_criteo_uplift(context, config: IngestConfig, criteo_data_file: str) -> str:
+def raw_hillstrom(config: IngestConfig, hillstrom_data_file):
     """
-    Loads Criteo data into Postgres.
+    Loads Hillstrom CSV into Postgres raw.hillstrom table.
     """
-    table_name = "criteo_uplift"
-    cmd = [
-        "python3", "scripts/load_to_postgres.py",
-        "--input-file", criteo_data_file,
-        "--table-name", table_name,
-        "--db-url", config.db_url
-    ]
-    subprocess.check_call(cmd)
-    context.log.info(f"Loaded data to raw.{table_name}")
-    return table_name
+    engine = create_engine(config.db_url)
+    
+    # Read CSV
+    # Chunking is good practice even if file is small
+    chunksize = 10000
+    table_name = "hillstrom"
+    schema = "raw"
+    
+    # Drop and recreate handled by pandas replace? 
+    # Actually better to append chunk by chunk, so we truncate first.
+    # But for simplicity in this asset, 'replace' on first chunk, 'append' on rest.
+    
+    first_chunk = True
+    for chunk in pd.read_csv(hillstrom_data_file, chunksize=chunksize):
+        if first_chunk:
+            chunk.to_sql(table_name, engine, schema=schema, if_exists='replace', index=False)
+            first_chunk = False
+        else:
+            chunk.to_sql(table_name, engine, schema=schema, if_exists='append', index=False)
+            
+    return f"Loaded data to {schema}.{table_name}"

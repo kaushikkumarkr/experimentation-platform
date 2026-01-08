@@ -19,7 +19,7 @@ dagster-dev:
 	dagster dev -f orchestration/dagster_app/defs.py -p 3000
 
 ingest:
-	dagster asset materialize -f orchestration/dagster_app/defs.py -m raw_criteo_uplift
+	dagster asset materialize -m orchestration.dagster_app.defs -m hillstrom_data_file -m raw_hillstrom
 
 
 test:

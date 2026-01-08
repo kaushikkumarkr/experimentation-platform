@@ -1,4 +1,4 @@
-# Experiment Decision Report: Criteo Uplift Test
+# Experiment Decision Report: Hillstrom Mens Email
     
 ## Executive Summary
 **Decision**: SHIP
@@ -7,32 +7,16 @@
 **Start Date**: 2023-01-01
 
 ## Rationale
-- Primary Metric (outcome_conversion): 0.0238 absolute effect (p=0.0000).
+- Primary Metric (outcome_conversion): 0.0068 absolute effect (p=0.0000).
 - Statistically significant positive effect observed.
 
 ## Health Checks
 | Check | Status | Details |
 |-------|--------|---------|
-| SRM | PASS | {'status': 'PASS', 'details': {'total_n': 100000, 'expected': {'0': 50000.0, '1': 50000.0}, 'observed': {'0': 49952, '1': 50048}, 'chi2_stat': 0.09216}, 'p_value': 0.7614489151115178, 'check_name': 'SRM'} |
+| SRM | PASS | {'status': 'PASS', 'details': {'total_n': 42613, 'expected': {'0': 21306.5, '1': 21306.5}, 'observed': {'0': 21306, '1': 21307}, 'chi2_stat': 2.346701710745547e-05}, 'p_value': 0.9961348415003554, 'check_name': 'SRM'} |
 
 ## Key Metrics Results
 | Metric | Method | Effect | P-Value | CI |
 |---|---|---|---|---|
-| outcome_conversion | z_test | 0.0238 | 0.0000 | [0.0208, 0.0268] |
-| conversion_cuped | cuped | 0.0237 | 0.0000 | [0.0207, 0.0267] |
-| outcome_visit | welch_t_test | -0.0006 | 0.7993 | [-0.0056, 0.0043] |
-| outcome_conversion | z_test | 0.0238 | 0.0000 | [0.0208, 0.0268] |
-| outcome_visit | welch_t_test | -0.0006 | 0.7993 | [-0.0056, 0.0043] |
-| conversion_cuped | cuped | 0.0237 | 0.0000 | [0.0207, 0.0267] |
-| outcome_conversion | z_test | 0.0238 | 0.0000 | [0.0208, 0.0268] |
-| outcome_visit | welch_t_test | -0.0006 | 0.7993 | [-0.0056, 0.0043] |
-| conversion_cuped | cuped | 0.0237 | 0.0000 | [0.0207, 0.0267] |
-| outcome_conversion | z_test | 0.0238 | 0.0000 | [0.0208, 0.0268] |
-| conversion_cuped | cuped | 0.0237 | 0.0000 | [0.0207, 0.0267] |
-| outcome_visit | welch_t_test | -0.0006 | 0.7993 | [-0.0056, 0.0043] |
-
-## Uplift Modeling (Opportunity)
-- **class_transform**: Qini AUC = 0.100. Targeting top 30% yields 0.049 expected lift.
-- **solo_model**: Qini AUC = 0.116. Targeting top 30% yields 0.055 expected lift.
-- **class_transform**: Qini AUC = 0.100. Targeting top 30% yields 0.049 expected lift.
-- **solo_model**: Qini AUC = 0.116. Targeting top 30% yields 0.055 expected lift.
+| outcome_conversion | z_test | 0.0068 | 0.0000 | [0.0050, 0.0086] |
+| outcome_visit | welch_t_test | 0.0766 | 0.0000 | [0.0700, 0.0832] |

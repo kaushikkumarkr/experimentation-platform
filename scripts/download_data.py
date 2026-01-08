@@ -2,67 +2,79 @@ import argparse
 import logging
 import os
 import pandas as pd
-from datasets import load_dataset
+import numpy as np
+import requests
+import io
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def download_data(output_path: str, sample_size: int = None, seed: int = 42):
-    """
-    Downloads Criteo Uplift dataset from Hugging Face and saves as CSV.
-    """
-    logger.info("Downloading dataset from Hugging Face: sema4ai/criteo-uplift-v2-1m-sample")
+OFFICIAL_URL = "http://www.minethatdata.com/Kevin_Hillstrom_MineThatData_E-MailAnalytics_DataMiningChallenge_2008.03.20.csv"
+
+def generate_synthetic_hillstrom(output_path, N=100000):
+    """Generates synthetic data matching Hillstrom schema."""
+    logger.warning("Generating SYNTHETIC Hillstrom data (Dev Mode).")
     
-    # Using a smaller mirror/sample dataset for stability if full dataset is too large/gated
-    # NOTE: In a real production scenario, we'd use the full dataset. 
-    # For this demo, we use a trusted public mirror or default to a safe extensive loading via 'criteo-uplift-v2' if available.
-    # However, 'criteo-uplift-v2' often requires manual download or specific configs. 
-    # To ensure this runs "out of the box", we will simulate the "Download" by generating
-    # a synthetic version if the HF download fails, OR try a known open dataset.
+    np.random.seed(42)
+    
+    df = pd.DataFrame()
+    df['recency'] = np.random.randint(1, 13, N)
+    df['history_segment'] = np.random.choice(['1) $0 - $100', '2) $100 - $200', '3) $200 - $350', '4) $350 - $500', '5) $500 - $750', '6) $750 - $1,000', '7) $1,000 +'], N)
+    df['history'] = np.random.gamma(50, 5, N)
+    df['mens'] = np.random.choice([0, 1], N)
+    df['womens'] = np.random.choice([0, 1], N)
+    df['zip_code'] = np.random.choice(['Urban', 'Suburban', 'Rural'], N)
+    df['newbie'] = np.random.choice([0, 1], N)
+    df['channel'] = np.random.choice(['Web', 'Phone', 'Multichannel'], N)
+    
+    # Treatment
+    df['segment'] = np.random.choice(['Mens E-Mail', 'Womens E-Mail', 'No E-Mail'], N)
+    
+    # Outcome Logic (Signal)
+    # Mens E-Mail increases visit/conversion for men (mens=1)
+    base_visit_prob = 0.1
+    visit_lift = 0.05
+    
+    def get_visit_prob(row):
+        prob = base_visit_prob
+        if row['segment'] == 'Mens E-Mail' and row['mens'] == 1:
+            prob += visit_lift
+        if row['segment'] == 'Womens E-Mail' and row['womens'] == 1:
+            prob += visit_lift
+        return prob
+
+    visit_probs = df.apply(get_visit_prob, axis=1)
+    df['visit'] = np.random.binomial(1, visit_probs)
+    
+    df['conversion'] = df['visit'] * np.random.binomial(1, 0.3, N) # 30% conversion given visit
+    df['spend'] = df['conversion'] * np.random.exponential(100, N)
+    
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    df.to_csv(output_path, index=False)
+    logger.info(f"Saved synthetic data to {output_path}")
+
+def download_data(output_path: str):
+    logger.info("Attempting to download Hillstrom dataset...")
     
     try:
-        # Attempt to load a known subset or the full set if possible.
-        # Fallback to creating a dummy dataset if internet/permissions fail, to keep the sprint unblocked.
-        # Ideally: ds = load_dataset("criteo-uplift-v2", split="train")
-        # For simplicity and speed in this demo environment, we will generate synthetic Criteo-like data
-        # if we can't easily fetch 10GB+ files.
+        # Try Official URL
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        r = requests.get(OFFICIAL_URL, headers=headers, timeout=10)
+        r.raise_for_status()
+        df = pd.read_csv(io.StringIO(r.text))
         
-        # Let's try to make synthetic data that LOOKS like Criteo for structure:
-        # f0..f11 (float), treatment (0/1), visit (0/1), conversion (0/1), exposure (0/1)
-        
-        logger.info("Generating synthetic Criteo-like data for Dev Mode (to avoid 15GB download wait).")
-        import numpy as np
-        np.random.seed(seed)
-        
-        N = sample_size if sample_size else 100_000
-        
-        df = pd.DataFrame({
-            'f0': np.random.normal(0, 1, N),
-            'f1': np.random.normal(0, 1, N),
-            'f2': np.random.normal(0, 1, N),
-            'treatment': np.random.choice([0, 1], N),
-            'conversion': np.random.choice([0, 1], N, p=[0.95, 0.05]),
-            'visit': np.random.choice([0, 1], N, p=[0.8, 0.2]),
-            'exposure': np.ones(N) # Simplification
-        })
-        
-        # Add some signal for uplift
-        # Treated users with high f0 have higher conversion
-        mask = (df['treatment'] == 1) & (df['f0'] > 0)
-        df.loc[mask, 'conversion'] = np.random.choice([0, 1], mask.sum(), p=[0.9, 0.1])
-        
+        logger.info(f"Downloaded {len(df)} rows from official source.")
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         df.to_csv(output_path, index=False)
-        logger.info(f"Saved {len(df)} rows to {output_path}")
-
+        
     except Exception as e:
-        logger.error(f"Failed to process data: {e}")
-        raise
+        logger.error(f"Download failed: {e}. Falling back to synthetic.")
+        generate_synthetic_hillstrom(output_path)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output-path", required=True, help="Path to save CSV")
+    parser.add_argument("--output-path", required=True)
     parser.add_argument("--sample-size", type=int, default=100000)
     args = parser.parse_args()
     
-    download_data(args.output_path, args.sample_size)
+    download_data(args.output_path)
