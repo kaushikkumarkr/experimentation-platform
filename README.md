@@ -74,6 +74,16 @@ The system is architected as a modular DAG (Directed Acyclic Graph) orchestrated
 ### ⚡️ The Engineering Pipeline
 ![Dagster Pipeline](screenshots/dagster_pipeline.png)
 
+| Layer | Component | Role |
+|---|---|---|
+| **1. Source** | `hillstrom_data_file` | Fetches raw CSV from external source (or generates synthetic dev data). |
+| **2. Ingestion** | `raw_hillstrom` | Validates schema and loads raw logs into Postgres. |
+| **3. Marts** | `experiment_observations` | Joins logs with registry; packs features (`recency`, `history`) into JSONB. |
+| **4. Trust** | `health_checks_asset` | **(Gatekeeper)** Runs SRM (Chi-Square) checks to validate randomization. |
+| **5. Stats** | `experiment_results` | Calculates A/B Test stats (Z-Test) and Variance Reduction (CUPED). |
+| **6. ML** | `uplift_results` | Trains S-Learner models to identify "Persuadables" vs "Sleeping Dogs". |
+| **7. Report** | `decision_report` | synthesizes all signals into a "SHIP/HOLD" decision document. |
+
 ### 📐 Logical Flow
 ```mermaid
 graph TD
