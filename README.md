@@ -72,7 +72,7 @@ The platform implements a complete Causal Inference hierarchy:
 The system is architected as a modular DAG (Directed Acyclic Graph) orchestrated by **Dagster**:
 
 ### ⚡️ The Engineering Pipeline
-![Dagster Pipeline](/Users/krkaushikkumar/.gemini/antigravity/brain/88b49cb9-8abb-4e48-bfbe-5cef31388d54/dagster_hillstrom_success_1767839535244.png)
+![Dagster Pipeline](/Users/krkaushikkumar/.gemini/antigravity/brain/88b49cb9-8abb-4e48-bfbe-5cef31388d54/dagster_pipeline.png)
 
 ### 📐 Logical Flow
 ```mermaid
