@@ -81,7 +81,7 @@ graph TD
     subgraph Inference["3. Causal Inference Engine"]
         D --> F[SRM Health Check]
         F -->|Pass/Fail| G{Valid?}
-        G -->|Yes| H[Frequentist A/B (T-Test)]
+        G -->|Yes| H["Frequentist A/B (T-Test)"]
         G -->|Yes| I[CUPED Variance Reduction]
         G -->|Yes| J["Uplift Model (S-Learner)"]
     end
