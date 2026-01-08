@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "experimentation_platform"
+version = "0.1.0"
+description = "A production-grade experimentation & incrementality system"
+authors = [
+    {name = "Antigravity", email = "antigravity@example.com"},
+]
+requires-python = ">=3.10"
+dependencies = [
+    "dagster",
+    "dagster-webserver",
+    "dagster-postgres",
+    "dagster-dbt",
+    "dbt-core",
+    "dbt-postgres",
+    "pandas",
+    "numpy",
+    "scikit-learn",
+    "scikit-uplift",
+    "statsmodels",
+    "psycopg2-binary",
+    "sqlalchemy",
+    "matplotlib",
+    "seaborn",
+    "fastapi",
+    "uvicorn",
+    "streamlit",
+    "datasets", # Hugging Face datasets
+    "ruff",
+    "pytest",
+    "plotly"
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["analysis*", "orchestration*", "app*", "scripts*"]
+namespaces = false

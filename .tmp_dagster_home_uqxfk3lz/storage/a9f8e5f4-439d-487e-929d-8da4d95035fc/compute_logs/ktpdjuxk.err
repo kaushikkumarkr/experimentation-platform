@@ -1,0 +1,10 @@
+[32m2026-01-07 20:58:58 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - a9f8e5f4-439d-487e-929d-8da4d95035fc - 47448 - LOGS_CAPTURED - Started capturing logs in process (pid: 47448).
+[32m2026-01-07 20:58:58 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - a9f8e5f4-439d-487e-929d-8da4d95035fc - 47448 - criteo_data_file - STEP_START - Started execution of step "criteo_data_file".
+INFO:__main__:Downloading dataset from Hugging Face: sema4ai/criteo-uplift-v2-1m-sample
+INFO:__main__:Generating synthetic Criteo-like data for Dev Mode (to avoid 15GB download wait).
+INFO:__main__:Saved 100000 rows to data/criteo_sample.csv
+[32m2026-01-07 20:59:02 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - a9f8e5f4-439d-487e-929d-8da4d95035fc - 47448 - criteo_data_file - STEP_OUTPUT - Yielded output "result" of type "String". (Type check passed).
+[32m2026-01-07 20:59:02 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - a9f8e5f4-439d-487e-929d-8da4d95035fc - criteo_data_file - Writing file at: /Users/krkaushikkumar/Desktop/2/experimentation-platform/.tmp_dagster_home_uqxfk3lz/storage/criteo_data_file using PickledObjectFilesystemIOManager...
+[32m2026-01-07 20:59:02 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - a9f8e5f4-439d-487e-929d-8da4d95035fc - 47448 - criteo_data_file - ASSET_MATERIALIZATION - Materialized value criteo_data_file.
+[32m2026-01-07 20:59:02 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - a9f8e5f4-439d-487e-929d-8da4d95035fc - 47448 - criteo_data_file - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
+[32m2026-01-07 20:59:02 -0500[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - a9f8e5f4-439d-487e-929d-8da4d95035fc - 47448 - criteo_data_file - STEP_SUCCESS - Finished execution of step "criteo_data_file" in 3.61s.

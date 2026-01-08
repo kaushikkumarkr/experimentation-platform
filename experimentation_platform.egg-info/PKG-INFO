@@ -1,0 +1,28 @@
+Metadata-Version: 2.4
+Name: experimentation_platform
+Version: 0.1.0
+Summary: A production-grade experimentation & incrementality system
+Author-email: Antigravity <antigravity@example.com>
+Requires-Python: >=3.10
+Requires-Dist: dagster
+Requires-Dist: dagster-webserver
+Requires-Dist: dagster-postgres
+Requires-Dist: dagster-dbt
+Requires-Dist: dbt-core
+Requires-Dist: dbt-postgres
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: scikit-learn
+Requires-Dist: scikit-uplift
+Requires-Dist: statsmodels
+Requires-Dist: psycopg2-binary
+Requires-Dist: sqlalchemy
+Requires-Dist: matplotlib
+Requires-Dist: seaborn
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: streamlit
+Requires-Dist: datasets
+Requires-Dist: ruff
+Requires-Dist: pytest
+Requires-Dist: plotly

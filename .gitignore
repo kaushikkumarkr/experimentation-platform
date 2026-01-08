@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+.DS_Store
+.venv/
+dagster.yaml
+workspace.yaml
+/dashboard/superset/superset_home/
+.dbt/
+logs/
+tmp/
+*.db
